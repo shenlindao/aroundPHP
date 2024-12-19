@@ -46,7 +46,7 @@ class HandleEventsCommand extends Command
         }
     }
 
-    private function shouldEventBeRan($event): bool
+    public function shouldEventBeRan(array $event): bool
 
     {
         $currentMinute = date("i");
@@ -67,6 +67,6 @@ class HandleEventsCommand extends Command
 
             (int)$event['month'] === (int)$currentMonth &&
 
-            (int)$event['weekDay'] === (int)$currentWeekday);
+            (int)$event['day_of_week'] === (int)$currentWeekday);
     }
 }
