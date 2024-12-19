@@ -25,7 +25,6 @@ class HandleEventsCommand extends Command
     {
 
         $this->app = $app;
-
     }
 
     public function run(array $options = []): void
@@ -39,13 +38,11 @@ class HandleEventsCommand extends Command
         $eventSender = new EventSender(new TelegramApiImpl($this->app->env('TELEGRAM_TOKEN')));
 
         foreach ($events as $event) {
-            
+
             if ($this->shouldEventBeRan($event)) {
 
                 $eventSender->sendMessage($event['receiver_id'], $event['text']);
-
             }
-
         }
     }
 
@@ -62,16 +59,14 @@ class HandleEventsCommand extends Command
 
         $currentWeekday = date("w");
 
-        return ($event['minute'] === $currentMinute &&
+        return ((int)$event['minute'] === (int)$currentMinute &&
 
-            $event['hour'] === $currentHour &&
+            (int)$event['hour'] === (int)$currentHour &&
 
-            $event['day'] === $currentDay &&
+            (int)$event['day'] === (int)$currentDay &&
 
-            $event['month'] === $currentMonth &&
+            (int)$event['month'] === (int)$currentMonth &&
 
-            $event['weekDay'] === $currentWeekday);
-            
+            (int)$event['weekDay'] === (int)$currentWeekday);
     }
-
 }
