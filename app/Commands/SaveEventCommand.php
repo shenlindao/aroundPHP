@@ -2,8 +2,11 @@
 
 namespace App\Commands;
 
+use App\Actions\Cron;
+use App\Actions\EventSaver;
 use App\Application;
 use App\Database\SQLite;
+use App\Exceptions\WrongCronString;
 use App\Models\Event;
 
 //php runner -c save_event --name 'Имя события' --receiver ‘Айди получателя, пока
@@ -14,24 +17,16 @@ class SaveEventCommand extends Command
     protected Application $app;
 
     public function __construct(Application $app)
-
     {
-
         $this->app = $app;
-
     }
+
     public function run(array $options  = []): void
-
     {
-
         $options = $this->getGetoptOptionValues();
-
         if ($this->isNeedHelp($options)) {
-
             $this->showHelp();
-
             return;
-
         }
 
         $cronValues = $this->getCronValues($options['cron']);
@@ -41,7 +36,6 @@ class SaveEventCommand extends Command
             $this->showHelp();
 
             return;
-
         }
 
         $params = [
@@ -64,8 +58,11 @@ class SaveEventCommand extends Command
 
         ];
 
-        $this->saveEvent($params);
+        $eventModel = new Event(new SQLite($this->app));
 
+        $eventSaver = new EventSaver($eventModel);
+
+        $eventSaver->saveEvent($params);
     }
 
     private function getGetoptOptionValues(): array
@@ -73,25 +70,16 @@ class SaveEventCommand extends Command
     {
 
         $shortopts = 'c:h:';
-
         $longopts = [
-
             "command:",
-
             "name:",
-
             "text:",
-
             "receiver:",
-
             "cron:",
-
             "help:",
-
         ];
 
         return getopt($shortopts, $longopts);
-
     }
 
     public function isNeedHelp(array $options): bool
@@ -118,26 +106,24 @@ class SaveEventCommand extends Command
 
         echo " Это тестовый скрипт добавления правил
 
-	Чтобы добавить правило нужно перечислить следующие поля:
+        Чтобы добавить правило нужно перечислить следующие поля:
 
-	--name Имя события
+        --name Имя события
 
-	--text Текст, который будет отправлен по событию
+        --text Текст, который будет отправлен по событию
 
-	--cron  Расписания отправки в формате cron
+        --cron Расписания отправки в формате cron
 
-	--receiver Идентификатор получателя сообщения
+        --receiver Идентификатор получателя сообщения
 
-	Для справки используйте флаги -h или --help
+        Для справки используйте флаги -h или --help
 
-";
+        ";
 
     }
 
     private function getCronValues(string $cronString): array
-
     {
-
         $cronValues = explode(" ", $cronString);
 
         $cronValues = array_map(function ($item) {
@@ -147,23 +133,5 @@ class SaveEventCommand extends Command
         }, $cronValues);
 
         return $cronValues;
-
     }
-
-    private function saveEvent(array $params): void
-
-    {
-
-        $event = new Event(new SQLite($this->app));
-
-        $event->insert(
-
-            implode(', ', array_keys($params)),
-
-            array_values($params)
-
-        );
-
-    }
-
 }

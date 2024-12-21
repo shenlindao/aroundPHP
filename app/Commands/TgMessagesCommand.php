@@ -8,24 +8,25 @@ use App\Telegram\TelegramApiImpl;
 class TgMessagesCommand extends Command
 {
     protected Application $app;
+    protected TelegramApiImpl $tgApi;
 
-    public function __construct(Application $app)
+    public function __construct(Application $app, TelegramApiImpl $tgApi)
     {
         $this->app = $app;
+        $this->tgApi = $tgApi;
     }
-    
-    function run(array $options  = []): void
-    {     
-        $tgApi = new TelegramApiImpl($this->app->env('TELEGRAM_TOKEN'));
-        $messages = $tgApi->getMessages(0);
-        echo json_encode($tgApi->getMessages(0));
+
+    function run(array $options = []): void
+    {
+        $messages = $this->tgApi->getMessages(0);
+        echo json_encode($this->tgApi->getMessages(0));
 
         foreach ($messages['result'] as $chatId => $texts) {
             foreach ($texts as $text) {
                 if ($text == '/start') {
-                    $tgApi->sendMessages($chatId, "Привет! Это бот.");
+                    $this->tgApi->sendMessages($chatId, "Привет! Это бот.");
                 } else {
-                    $tgApi->sendMessages($chatId, "Вы отправили: $text");
+                    $this->tgApi->sendMessages($chatId, "Вы отправили: $text");
                 }
             }
         }
