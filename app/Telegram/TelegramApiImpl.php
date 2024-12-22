@@ -26,7 +26,10 @@ class TelegramApiImpl implements TelegramApi
 
             $response = json_decode(curl_exec($ch), true);
 
-            if (!$response['ok'] || empty($response['result'])) break;
+            if (!is_array($response) || !isset($response['ok'])) {
+                error_log("Invalid response: " . print_r($response, true));
+                break;
+            }
 
             foreach ($response['result'] as $data) {
                 $chatId = $data['message']['chat']['id'];
